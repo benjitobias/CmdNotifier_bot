@@ -18,6 +18,6 @@ def telegram_bot_sendtext(bot_message):
 
     return response.json()
 
-test = telegram_bot_sendtext("Test shit")
+test = telegram_bot_sendtext("Process finished running on " + os.uname[1])
 print(test)
 
