@@ -1,6 +1,10 @@
+#!/bin/python
+import os
 import requests
 
-with open("SECRET_API_TOKEN", "r") as token_file:
+package_dir = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(package_dir, "SECRET_API_TOKEN"), "r") as token_file:
     secret_api_token = token_file.read().strip()
 print("Secret_token: " + secret_api_token)
 
