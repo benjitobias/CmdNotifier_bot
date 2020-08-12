@@ -1,8 +1,16 @@
 #!/bin/python
 import os
+import time
+import argparse
 import requests
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
+
+parser = argparse.ArgumentParser()
+   
+parser.add_argument('-p', '--pid', dest='pid', action='store', help="PID to monitor")
+
+args = parser.parse_args()
 
 with open(os.path.join(package_dir, "SECRET_API_TOKEN"), "r") as token_file:
     secret_api_token = token_file.read().strip()
@@ -18,6 +26,22 @@ def telegram_bot_sendtext(bot_message):
 
     return response.json()
 
-test = telegram_bot_sendtext("Process finished running on " + os.uname()[1])
+if args.pid:
+    pid = args.pid
+    with open("/proc/%s/cmdline" % pid) as cmd_file:
+        cmd = cmd_file.read().replace("\x00", " ")
+    print("Monitoring: " + str(pid) + " : " + cmd)
+
+    while True:
+        if not os.path.exists("/proc/%s" % pid):
+            test = telegram_bot_sendtext("%s finished running on " % cmd + os.uname()[1])
+            break
+        time.sleep(3)
+
+
+
+else:
+    test = telegram_bot_sendtext("Process finished running on " + os.uname()[1])
+
 print(test)
 
