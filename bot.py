@@ -1,6 +1,7 @@
 #!/bin/python
 import os
 import time
+import urllib
 import argparse
 import requests
 
@@ -34,7 +35,7 @@ if args.pid:
 
     while True:
         if not os.path.exists("/proc/%s" % pid):
-            test = telegram_bot_sendtext("%s finished running on " % cmd + os.uname()[1])
+            test = telegram_bot_sendtext("%s finished running on " % urllib.parse.quote(cmd) + os.uname()[1])
             break
         time.sleep(3)
 
