@@ -1,48 +1,71 @@
 #!/bin/python
 import os
 import time
+import json
 import urllib
 import argparse
 import requests
+
+
+BOT_TOKEN = "bot_token"
+CHAT_ID = "chat_id"
+
+BOT_SEND_TEXT_REQUEST = "https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&parse_mode=Markdown&text={text}"
+
+PROC_PID = "/proc/{pid}"
+PROC_CMDLINE = "/proc/{pid}/cmdline"
+
+PID_MESSAGE = "```{cmd}``` finished running on {hostname}"
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
 parser = argparse.ArgumentParser()
    
-parser.add_argument('-p', '--pid', dest='pid', action='store', help="PID to monitor")
+parser.add_argument('-p', '--pid', dest='pid', action='store', help="PID to monitor", type=str)
+parser.add_argument('-c', '--config', dest='config', action='store', help="Config file", default="config.json")
 
 args = parser.parse_args()
 
-with open(os.path.join(package_dir, "SECRET_API_TOKEN"), "r") as token_file:
-    secret_api_token = token_file.read().strip()
-print("Secret_token: " + secret_api_token)
-
-def telegram_bot_sendtext(bot_message):
-    bot_token = secret_api_token
-    bot_chatID = '13225322'
-    send_text = 'https://api.telegram.org/bot' + bot_token + '/sendMessage?chat_id=' + bot_chatID + '&parse_mode=Markdown&text=' + bot_message
-
-    print("Request: " + send_text)
-    response = requests.get(send_text)
-
-    return response.json()
-
-if args.pid:
-    pid = args.pid
-    with open("/proc/%s/cmdline" % pid) as cmd_file:
+def monitor_pid(pid, bot_token, chat_id):
+    with open(PROC_CMDLINE.format(pid=pid)) as cmd_file:
         cmd = cmd_file.read().replace("\x00", " ")
-    print("Monitoring: " + str(pid) + " : " + cmd)
+    print("Monitoring: " + pid + " : " + cmd)
 
     while True:
-        if not os.path.exists("/proc/%s" % pid):
-            test = telegram_bot_sendtext("%s finished running on " % urllib.parse.quote(cmd) + os.uname()[1])
+        if not os.path.exists(PROC_PID.format(pid=pid)):
+            text = PID_MESSAGE.format(cmd=cmd, hostname=os.uname()[1])
+            response = send_telegram_bot_message(bot_token, chat_id, text)
             break
         time.sleep(3)
 
 
+def read_config(config_path):
+    with open(config_path) as config_file:
+        config = json.load(config_file)
+    return config
 
-else:
-    test = telegram_bot_sendtext("Process finished running on " + os.uname()[1])
 
-print(test)
+def send_telegram_bot_message(bot_token, chat_id, text):
+    url_text = urllib.parse.quote(text)
+    bot_request = BOT_SEND_TEXT_REQUEST.format(bot_token=bot_token, chat_id=chat_id, text=url_text)
+    response = requests.get(bot_request)
+    return response.json()
+
+
+def main():
+    args = parser.parse_args()
+    config = read_config(args.config)
+
+    bot_token = config[BOT_TOKEN]
+    chat_id = config[CHAT_ID]
+
+    if args.pid:
+        monitor_pid(args.pid, bot_token, chat_id)
+    else:
+        text = "Command finished running on {hostname}".format(hostname=os.uname()[1])
+        send_telegram_bot_message(bot_token, chat_id, text)
+    
+
+if __name__ == '__main__':
+    main()
 
