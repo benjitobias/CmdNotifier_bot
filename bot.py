@@ -15,7 +15,7 @@ BOT_SEND_TEXT_REQUEST = "https://api.telegram.org/bot{bot_token}/sendMessage?cha
 PROC_PID = "/proc/{pid}"
 PROC_CMDLINE = "/proc/{pid}/cmdline"
 
-PID_MESSAGE = "```{cmd}``` finished running on {hostname}"
+PID_MESSAGE = "{cmd} finished running on {hostname}"
 
 package_dir = os.path.dirname(os.path.abspath(__file__))
 
