@@ -17,12 +17,14 @@ PROC_CMDLINE = "/proc/{pid}/cmdline"
 
 PID_MESSAGE = "{cmd} finished running on {hostname}"
 
-package_dir = os.path.dirname(os.path.abspath(__file__))
+package_dir = os.path.dirname(os.path.realpath(__file__))
+
+default_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
 
 parser = argparse.ArgumentParser()
    
 parser.add_argument('-p', '--pid', dest='pid', action='store', help="PID to monitor", type=str)
-parser.add_argument('-c', '--config', dest='config', action='store', help="Config file", default="config.json")
+parser.add_argument('-c', '--config', dest='config', action='store', help="Config file", default=default_config_path)
 
 args = parser.parse_args()
 
