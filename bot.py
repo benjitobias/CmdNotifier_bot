@@ -49,6 +49,7 @@ def read_config(config_path):
 
 
 def send_telegram_bot_message(bot_token, chat_id, text):
+    verbose_print("Message to send: %s" % text)
     url_text = urllib.parse.quote(text)
     bot_request = BOT_SEND_TEXT_REQUEST.format(bot_token=bot_token, chat_id=chat_id, text=url_text)
     verbose_print("Request: %s" % bot_request)
