@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser()
    
 parser.add_argument('-p', '--pid', dest='pid', action='store', help="PID to monitor", type=str)
 parser.add_argument('-c', '--config', dest='config', action='store', help="Config file", default=default_config_path)
+parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help="Config file", default=default_config_path)
 
 args = parser.parse_args()
 
@@ -50,8 +51,15 @@ def read_config(config_path):
 def send_telegram_bot_message(bot_token, chat_id, text):
     url_text = urllib.parse.quote(text)
     bot_request = BOT_SEND_TEXT_REQUEST.format(bot_token=bot_token, chat_id=chat_id, text=url_text)
-    response = requests.get(bot_request)
-    return response.json()
+    verbose_print("Request: %s" % bot_request)
+    response = requests.get(bot_request).json()
+    verbose_print("Respnse: %s" % response)
+    return response
+
+
+def verbose_print(text):
+    if args.verbose:
+        print(text)
 
 
 def main():
