@@ -10,12 +10,14 @@ import requests
 BOT_TOKEN = "bot_token"
 CHAT_ID = "chat_id"
 
-BOT_SEND_TEXT_REQUEST = "https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&parse_mode=Markdown&text={text}"
+BOT_SEND_TEXT_REQUEST = "https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&parse_mode=MarkdownV2&text={text}"
 
 PROC_PID = "/proc/{pid}"
 PROC_CMDLINE = "/proc/{pid}/cmdline"
 
 PID_MESSAGE = "{cmd} finished running on {hostname}"
+
+MARKDOWN_CHARS = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
 
 package_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -48,9 +50,17 @@ def read_config(config_path):
     return config
 
 
+def markdown_escape(text):
+    for md_char in MARKDOWN_CHARS:
+        escaped_char = "\\%s" % md_char
+        text = text.replace(md_char, escaped_char)
+    return text
+
+
 def send_telegram_bot_message(bot_token, chat_id, text):
     verbose_print("Message to send: %s" % text)
-    url_text = urllib.parse.quote(text)
+    escaped_text = markdown_escape(text) 
+    url_text = urllib.parse.quote(escaped_text)
     bot_request = BOT_SEND_TEXT_REQUEST.format(bot_token=bot_token, chat_id=chat_id, text=url_text)
     verbose_print("Request: %s" % bot_request)
     response = requests.get(bot_request).json()
