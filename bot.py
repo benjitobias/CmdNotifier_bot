@@ -69,7 +69,7 @@ def send_telegram_bot_message(bot_token, chat_id, text):
 
 
 def verbose_print(text):
-    if args.verbose:
+    if args.verbose == True:
         print(text)
 
 
