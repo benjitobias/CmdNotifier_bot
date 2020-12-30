@@ -1,5 +1,6 @@
 #!/bin/python
 import os
+import sys
 import time
 import json
 import urllib
@@ -45,9 +46,13 @@ def monitor_pid(pid, bot_token, chat_id):
 
 
 def read_config(config_path):
-    with open(config_path) as config_file:
-        config = json.load(config_file)
-    return config
+    try:
+        with open(config_path) as config_file:
+            config = json.load(config_file)
+        return config
+    except json.decoder.JSONDecodeError:
+        print("Illegal JSON in config file: %s" % config_path)
+        sys.exit(1)
 
 
 def markdown_escape(text):
